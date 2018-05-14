@@ -13,6 +13,8 @@ app.use(bodyParser.json());
 
 // Global variables
 const token = process.env.FB_ACCESS_TOKEN;
+const mLabUri = "mongodb://" + process.env.writerId +
+":" + process.env.writerPass + "@ds157641.mlab.com:57641/motivate-bot";
 
 // Start server
 app.listen(app.get('port'), function() {
@@ -33,21 +35,23 @@ app.get('/webhook/', function (req, res) {
 });
 
 // Message receiver
-app.post('/webhook/', function (req, res) {
-	var messaging_events = req.body.entry[0].messaging;
-	for (var i = 0; i < messaging_events.length; i++) {
-		var event = req.body.entry[0].messaging[i];
-		var sender = event.sender.id;
-		if (event.message && event.message.text) {
-			var text = event.message.text.toLowerCase();
-			if (text === 'add' || text === 'start') {
-				addUserToDB(sender);
-				continue;
+app.post('/webhook/', function(req, res) {
+    var messaging_events = req.body.entry[0].messaging;
+    for (var i = 0; i < messaging_events.length; i++) {
+        var event = req.body.entry[0].messaging[i];
+        var sender = event.sender.id;
+        if (event.message && event.message.text) {
+            var text = event.message.text.toLowerCase();
+            if (text === "start" || text === "add") {
+                addUserToDB(sender);
+            } else if (text === "stop" || text === "remove") {
+				removeUserFromDB(sender);
+			} else {
+				sendTextMessage(sender, text + "!");
 			}
-			sendTextMessage(sender, "Text received, echo: " + text.substring(0, 200) + ", from: " + sender);
-		}
-	}
-	res.sendStatus(200);
+        }
+    }
+    res.sendStatus(200);
 });
 
 // -- Helper functions --
@@ -72,9 +76,6 @@ function sendTextMessage(sender, text) {
 }
 
 function addUserToDB(sender) {
-
-	var mLabUri = "mongodb://" + process.env.writerId +
-	":" + process.env.writerPass + "@ds157641.mlab.com:57641/motivate-bot";
 
 	mongo.connect(mLabUri, function(err, client){
         if (err){
@@ -104,4 +105,35 @@ function addUserToDB(sender) {
 	});
 
 	sendTextMessage(sender, "Alright, I'll send you motivational quotes once a day :)");
+}
+
+function removeUserFromDB(sender) {
+	// mongo.connect(mLabUri, function(err, client){
+    //     if (err){
+    //         throw err;
+    //         res.end(err);
+    //     } else {
+	// 		var db = client.db("motivate-bot");
+    //         db.collection("recipients").findOne({"sender" : sender}, function(err, result){
+	// 			if (result === null) {
+	// 				// User not find; adding now
+	// 				var data = {"sender": sender};
+	// 				db.collection("recipients").insertOne(data, function(err, res) {
+	// 					if (err) {
+	// 						console.log(err);
+	// 					}
+	// 					if (res) {
+	// 						console.log(res);
+	// 					}
+	// 					client.close();
+	// 				});
+	// 			} else {
+	// 				// Found user
+	// 				client.close();
+	// 			}
+	// 		});
+	// 	}
+	// });
+
+	// sendTextMessage(sender, "Alright, I'll send you motivational quotes once a day :)");
 }
