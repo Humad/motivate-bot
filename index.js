@@ -5,6 +5,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const request = require("request");
 const app = express();
+const mongo = require('mongodb').MongoClient;
 
 // App setup
 app.set("port", (process.env.PORT || 8000));
@@ -20,6 +21,12 @@ const mLabUri = "mongodb://" + process.env.writerId +
 app.listen(app.get("port"), function() {
 	console.log("running on port", app.get("port"));
 });
+
+// Keep Heroku app alive
+const http = require("http");
+setInterval(function() {
+    http.get("http://getquote.herokuapp.com");
+}, 300000); // 5 Minutes 
 
 // Home
 app.get("/", function (req, res) {
