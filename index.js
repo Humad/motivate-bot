@@ -1,20 +1,30 @@
 'use strict';
 
+// Modules
 const express = require('express');
 const bodyParser = require('body-parser');
 const request = require('request');
 const app = express();
 
+// App setup
 app.set('port', (process.env.PORT || 8000));
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
+
+// Global variables
+const token = process.env.FB_ACCESS_TOKEN;
+
+// Start server
+app.listen(app.get('port'), function() {
+	console.log('running on port', app.get('port'));
+});
 
 // Home
 app.get('/', function (req, res) {
 	res.send('Hello world!');
 });
 
-// for Facebook verification
+// Facebook verification
 app.get('/webhook/', function (req, res) {
 	if (req.query['hub.verify_token'] === 'somethingsomethingtokenstuff') {
 		res.send(req.query['hub.challenge']);
@@ -22,29 +32,33 @@ app.get('/webhook/', function (req, res) {
 	res.send('Error, wrong token');
 });
 
+// Message receiver
 app.post('/webhook/', function (req, res) {
-    var messaging_events = req.body.entry[0].messaging;
-    for (var i = 0; i < messaging_events.length; i++) {
-      var event = req.body.entry[0].messaging[i];
-      var sender = event.sender.id;
-      if (event.message && event.message.text) {
-  	    var text = event.message.text;
-  	    if (text === 'Generic') {
-  		    sendGenericMessage(sender);
-  		    continue;
-  	    }
-  	    sendTextMessage(sender, "Text received, echo: " + text.substring(0, 200) + ", from: " + sender);
-      }
-      if (event.postback) {
-  	    var text = JSON.stringify(event.postback);
-  	    sendTextMessage(sender, "Postback received: "+text.substring(0, 200));
-  	    continue;
-      }
-    }
-    res.sendStatus(200);
-  });
+	var messaging_events = req.body.entry[0].messaging;
+	for (var i = 0; i < messaging_events.length; i++) {
+		var event = req.body.entry[0].messaging[i];
+		var sender = event.sender.id;
+		updateDB(sender);
+		if (event.message && event.message.text) {
+			var text = event.message.text;
+			if (text === 'Generic') {
+				sendGenericMessage(sender);
+				continue;
+			}
+			sendTextMessage(sender, "Text received, echo: " + text.substring(0, 200) + ", from: " + sender);
+		}
 
-const token = process.env.FB_ACCESS_TOKEN;
+		if (event.postback) {
+			var text = JSON.stringify(event.postback);
+			sendTextMessage(sender, "Postback received: "+text.substring(0, 200));
+			continue;
+		}
+
+	}
+	res.sendStatus(200);
+});
+
+// -- Helper functions --
 
 function sendTextMessage(sender, text) {
     var messageData = {text: text};
@@ -114,7 +128,35 @@ function sendGenericMessage(sender) {
     });
 }
 
-// Start server
-app.listen(app.get('port'), function() {
-	console.log('running on port', app.get('port'));
-});
+function updateDB(sender) {
+	var mLabUri = "mongodb://" + process.env.writerId +
+	":" + process.env.writerPass + "@ds157641.mlab.com:57641/motivate-bot";
+
+	mongo.connect(mLabUri, function(err, db){
+        if (err){
+            throw err;
+            res.end(err);
+        } else {
+            db.collection(collection).find({"sender" : sender}, function(err, docs){
+				if (docs.length === 0) {
+					// Sender doesn't exist
+					console.log("doesn't exist");
+				}
+			});
+        }
+	});
+	
+	//
+	// mongo.connect(mLabUri, function(err, db){
+    //     if (err){
+    //         throw err;
+    //         res.end(err);
+    //     } else {
+    //         db.collection(collection).find().toArray(function(err, docs){
+    //             res.status(200).json({data : docs});
+    //             db.close();
+    //         });
+    //     }
+    // })
+
+}
