@@ -1,77 +1,72 @@
-'use strict'
+'use strict';
 
-const express = require('express')
-const bodyParser = require('body-parser')
-const request = require('request')
-const app = express()
+const express = require('express');
+const bodyParser = require('body-parser');
+const request = require('request');
+const app = express();
 
-app.set('port', (process.env.PORT || 8000))
+app.set('port', (process.env.PORT || 8000));
+app.use(bodyParser.urlencoded({extended: false}));
+app.use(bodyParser.json());
 
-// Process application/x-www-form-urlencoded
-app.use(bodyParser.urlencoded({extended: false}))
-
-// Process application/json
-app.use(bodyParser.json())
-
-// Index route
+// Home
 app.get('/', function (req, res) {
-	res.send('Hello world!')
-})
+	res.send('Hello world!');
+});
 
 // for Facebook verification
 app.get('/webhook/', function (req, res) {
 	if (req.query['hub.verify_token'] === 'somethingsomethingtokenstuff') {
-		res.send(req.query['hub.challenge'])
+		res.send(req.query['hub.challenge']);
 	}
-	res.send('Error, wrong token')
-})
+	res.send('Error, wrong token');
+});
 
 app.post('/webhook/', function (req, res) {
-    let messaging_events = req.body.entry[0].messaging
-    for (let i = 0; i < messaging_events.length; i++) {
-      let event = req.body.entry[0].messaging[i]
-      let sender = event.sender.id
+    var messaging_events = req.body.entry[0].messaging;
+    for (var i = 0; i < messaging_events.length; i++) {
+      var event = req.body.entry[0].messaging[i];
+      var sender = event.sender.id;
       if (event.message && event.message.text) {
-  	    let text = event.message.text
+  	    var text = event.message.text;
   	    if (text === 'Generic') {
-  		    sendGenericMessage(sender)
-  		    continue
+  		    sendGenericMessage(sender);
+  		    continue;
   	    }
-  	    sendTextMessage(sender, "Text received, echo: " + text.substring(0, 200) + ", from: " + sender)
+  	    sendTextMessage(sender, "Text received, echo: " + text.substring(0, 200) + ", from: " + sender);
       }
       if (event.postback) {
-  	    let text = JSON.stringify(event.postback)
-  	    sendTextMessage(sender, "Postback received: "+text.substring(0, 200))
-  	    continue
+  	    var text = JSON.stringify(event.postback);
+  	    sendTextMessage(sender, "Postback received: "+text.substring(0, 200));
+  	    continue;
       }
     }
-    res.sendStatus(200)
-  })
+    res.sendStatus(200);
+  });
 
-const token = process.env.FB_ACCESS_TOKEN
+const token = process.env.FB_ACCESS_TOKEN;
 
 function sendTextMessage(sender, text) {
-    console.log(token)
-    let messageData = { text:text }
+    var messageData = {text: text};
     request({
 	    url: 'https://graph.facebook.com/v2.6/me/messages',
-	    qs: {access_token:token},
+	    qs: {access_token: token},
 	    method: 'POST',
 		json: {
-		    recipient: {id:sender},
+		    recipient: {id: sender},
 			message: messageData,
 		}
 	}, function(error, response, body) {
 		if (error) {
-		    console.log('Error sending messages: ', error)
+		    console.log('Error:', error);
 		} else if (response.body.error) {
-		    console.log('Error: ', response.body.error)
+		    console.log('Error: ', response.body.error);
 	    }
-    })
+    });
 }
 
 function sendGenericMessage(sender) {
-    let messageData = {
+    var messageData = {
 	    "attachment": {
 		    "type": "template",
 		    "payload": {
@@ -101,7 +96,7 @@ function sendGenericMessage(sender) {
 			    }]
 		    }
 	    }
-    }
+    };
     request({
 	    url: 'https://graph.facebook.com/v2.6/me/messages',
 	    qs: {access_token:token},
@@ -116,10 +111,10 @@ function sendGenericMessage(sender) {
 	    } else if (response.body.error) {
 		    console.log('Error: ', response.body.error)
 	    }
-    })
+    });
 }
 
-// Spin up the server
+// Start server
 app.listen(app.get('port'), function() {
-	console.log('running on port', app.get('port'))
-})
+	console.log('running on port', app.get('port'));
+});
