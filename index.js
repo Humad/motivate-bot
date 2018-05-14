@@ -38,22 +38,14 @@ app.post('/webhook/', function (req, res) {
 	for (var i = 0; i < messaging_events.length; i++) {
 		var event = req.body.entry[0].messaging[i];
 		var sender = event.sender.id;
-		updateDB(sender);
 		if (event.message && event.message.text) {
-			var text = event.message.text;
-			if (text === 'Generic') {
-				sendGenericMessage(sender);
+			var text = event.message.text.toLowerCase();
+			if (text === 'add' || text === 'start') {
+				addUserToDB(sender);
 				continue;
 			}
 			sendTextMessage(sender, "Text received, echo: " + text.substring(0, 200) + ", from: " + sender);
 		}
-
-		if (event.postback) {
-			var text = JSON.stringify(event.postback);
-			sendTextMessage(sender, "Postback received: "+text.substring(0, 200));
-			continue;
-		}
-
 	}
 	res.sendStatus(200);
 });
@@ -79,84 +71,37 @@ function sendTextMessage(sender, text) {
     });
 }
 
-function sendGenericMessage(sender) {
-    var messageData = {
-	    "attachment": {
-		    "type": "template",
-		    "payload": {
-				"template_type": "generic",
-			    "elements": [{
-					"title": "First card",
-				    "subtitle": "Element #1 of an hscroll",
-				    "image_url": "http://messengerdemo.parseapp.com/img/rift.png",
-				    "buttons": [{
-					    "type": "web_url",
-					    "url": "https://www.messenger.com",
-					    "title": "web url"
-				    }, {
-					    "type": "postback",
-					    "title": "Postback",
-					    "payload": "Payload for first element in a generic bubble",
-				    }],
-			    }, {
-				    "title": "Second card",
-				    "subtitle": "Element #2 of an hscroll",
-				    "image_url": "http://messengerdemo.parseapp.com/img/gearvr.png",
-				    "buttons": [{
-					    "type": "postback",
-					    "title": "Postback",
-					    "payload": "Payload for second element in a generic bubble",
-				    }],
-			    }]
-		    }
-	    }
-    };
-    request({
-	    url: 'https://graph.facebook.com/v2.6/me/messages',
-	    qs: {access_token:token},
-	    method: 'POST',
-	    json: {
-		    recipient: {id:sender},
-		    message: messageData,
-	    }
-    }, function(error, response, body) {
-	    if (error) {
-		    console.log('Error sending messages: ', error)
-	    } else if (response.body.error) {
-		    console.log('Error: ', response.body.error)
-	    }
-    });
-}
+function addUserToDB(sender) {
 
-function updateDB(sender) {
 	var mLabUri = "mongodb://" + process.env.writerId +
 	":" + process.env.writerPass + "@ds157641.mlab.com:57641/motivate-bot";
 
-	mongo.connect(mLabUri, function(err, db){
+	mongo.connect(mLabUri, function(err, client){
         if (err){
             throw err;
             res.end(err);
         } else {
-            db.collection(collection).find({"sender" : sender}, function(err, docs){
-				if (docs.length === 0) {
-					// Sender doesn't exist
-					console.log("doesn't exist");
+			var db = client.db("motivate-bot");
+            db.collection("recipients").findOne({"sender" : sender}, function(err, result){
+				if (result === null) {
+					// User not find; adding now
+					var data = {"sender": sender};
+					db.collection("recipients").insertOne(data, function(err, res) {
+						if (err) {
+							console.log(err);
+						}
+						if (res) {
+							console.log(res);
+						}
+						client.close();
+					});
+				} else {
+					// Found user
+					client.close();
 				}
 			});
-        }
+		}
 	});
-	
-	//
-	// mongo.connect(mLabUri, function(err, db){
-    //     if (err){
-    //         throw err;
-    //         res.end(err);
-    //     } else {
-    //         db.collection(collection).find().toArray(function(err, docs){
-    //             res.status(200).json({data : docs});
-    //             db.close();
-    //         });
-    //     }
-    // })
 
+	sendTextMessage(sender, "Alright, I'll send you motivational quotes once a day :)");
 }
