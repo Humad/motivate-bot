@@ -28,6 +28,9 @@ setInterval(function() {
     http.get("https://sheltered-cliffs-61712.herokuapp.com/");
 }, 300000); // 5 Minutes 
 
+// Send data every x milliseconds
+setInterval(sendDailyMessage, 60000);
+
 // Home
 app.get("/", function (req, res) {
 	res.send("Hello world!");
