@@ -26,7 +26,7 @@ app.listen(app.get("port"), function() {
 const http = require("http");
 setInterval(function() {
     http.get("https://sheltered-cliffs-61712.herokuapp.com/");
-}, 300000); // 5 Minutes 
+}, 86400000); // 5 Minutes 
 
 // Send data every x milliseconds
 setInterval(sendDailyMessage, 60000);
@@ -140,7 +140,7 @@ function removeUserFromDB(sender) {
 
 function getQuote(callback) {
 	request({
-	    url: "https://getquote.herokuapp.com/getone",
+	    url: "https://getquote.herokuapp.com/getmotivational",
 	    method: "GET"
 	}, function(error, response, body) {
 		if (error) {
