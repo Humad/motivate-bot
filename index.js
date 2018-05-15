@@ -25,7 +25,7 @@ app.listen(app.get("port"), function() {
 // Keep Heroku app alive
 const http = require("http");
 setInterval(function() {
-    http.get("http://getquote.herokuapp.com");
+    http.get("https://sheltered-cliffs-61712.herokuapp.com/");
 }, 300000); // 5 Minutes 
 
 // Home
@@ -49,14 +49,13 @@ app.post("/webhook/", function(req, res) {
         var sender = event.sender.id;
         if (event.message && event.message.text) {
             var text = event.message.text.toLowerCase();
-            if (text === "start" || text === "add") {
+            if (text === "start" || text === "add" || text === "subscribe") {
                 addUserToDB(sender);
-            } else if (text === "stop" || text === "remove") {
+            } else if (text === "stop" || text === "remove" || text === "unsubscribe") {
 				removeUserFromDB(sender);
 			} else {
-				getQuote(function(quote) {
-					sendTextMessage(sender, quote);
-				});
+				var introMessage = "Hi! I'm Botivate - a motivational bot. I can send you a motivational quote every day.\nTo subscribe to my services, say SUBSCRIBE. To unsubscribe at anytime, say UNSUBSCRIBE. Have a nice day!";
+				sendTextMessage(sender, introMessage);
 			}
         }
     }
@@ -152,4 +151,23 @@ function getQuote(callback) {
 		var quote = "\"" + decodeURIComponent(parsedBody.data.text) + "\" - " + decodeURIComponent(parsedBody.data.author);
 		callback(quote);
     });
+}
+
+function sendDailyMessage() {
+	getQuote(function(quote) {
+		mongo.connect(mLabUri, function(err, client){
+			if (err){
+				throw err;
+				res.end(err);
+			} else {
+				var db = client.db("motivate-bot");
+				db.collection("recipients").find().toArray(function(err, docs){
+					for (var i = 0; i < docs.length; i++) {
+						sendTextMessage(docs[i].sender, quote)
+					}
+					client.close();
+				});
+			}
+		});
+	});
 }
