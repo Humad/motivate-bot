@@ -25,7 +25,7 @@ app.listen(app.get("port"), function() {
 // Keep Heroku app alive
 const http = require("http");
 setInterval(function() {
-    http.get("https://sheltered-cliffs-61712.herokuapp.com/");
+    http.get("http://sheltered-cliffs-61712.herokuapp.com/");
 }, 300000); // 5 Minutes 
 
 // Send data every x milliseconds
