@@ -29,7 +29,7 @@ setInterval(function() {
 }, 300000); // 5 Minutes 
 
 // Send data every x milliseconds
-setInterval(sendDailyMessage, 60000);
+setInterval(sendDailyMessage, 43200000);
 
 // Home
 app.get("/", function (req, res) {
