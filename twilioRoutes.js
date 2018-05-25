@@ -19,11 +19,20 @@ const fromNumber = process.env.MY_TWILIO_NUMBER;
 const twilio = require('twilio');
 const client = new twilio(accountSid, authToken);
 
-setInterval(sendSMS, 43200000);
+setInterval(sendSMS, 3600000);
 
 router.get('/', function(req, res) {
     sendSMS();
     res.send("Hello world!");
+});
+
+router.get('/add', function(req, res) {
+    res.render('addNumber');
+});
+
+router.post('/add', function(req, res) {
+    addNewRecipient(req.body.name, req.body.phoneNumber);
+    res.render('addNumber');
 });
 
 function addNewRecipient(name, phoneNumber) {

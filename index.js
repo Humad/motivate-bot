@@ -4,12 +4,15 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const request = require("request");
+const path = require('path');
 const app = express();
 
 // App setup
 app.set("port", (process.env.PORT || 8000));
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'hbs');
 
 // Start server
 app.listen(app.get("port"), function() {
