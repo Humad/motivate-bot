@@ -13,7 +13,10 @@ function getQuote(callback) {
 
 		var parsedBody = JSON.parse(body);
 		
-		var quote = "\"" + decodeURIComponent(parsedBody.data.text) + "\" - " + decodeURIComponent(parsedBody.data.author);
+		var quote = "\"" + decodeURIComponent(parsedBody.data.text);
+		if (parsedBody.data.author) {
+			quote = quote + "\" - " + decodeURIComponent(parsedBody.data.author);
+		}
 		callback(quote);
     });
 }
