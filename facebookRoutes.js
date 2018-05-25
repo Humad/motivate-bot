@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const mongo = require('mongodb').MongoClient;
+const request = require("request");
 
 const token = process.env.FB_ACCESS_TOKEN;
 const mLabUri = "mongodb://" + process.env.writerId +
