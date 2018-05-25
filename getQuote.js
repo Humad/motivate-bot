@@ -14,7 +14,8 @@ function getQuote(callback) {
 		var parsedBody = JSON.parse(body);
 		
 		var quote = "\"" + decodeURIComponent(parsedBody.data.text);
-		if (parsedBody.data.author) {
+		// TODO: Find a better way to check for author existence
+		if (parsedBody.data.author.length > 2) {
 			quote = quote + "\" - " + decodeURIComponent(parsedBody.data.author);
 		}
 		callback(quote);
