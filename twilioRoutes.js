@@ -19,7 +19,7 @@ const fromNumber = process.env.MY_TWILIO_NUMBER;
 const twilio = require('twilio');
 const client = new twilio(accountSid, authToken);
 
-setInterval(sendSMS, 3600000);
+setInterval(sendSMS, 43200000);
 
 router.get('/', function(req, res) {
     sendSMS();
@@ -56,6 +56,8 @@ function sendSMS() {
                 for (var i = 0; i < results.length; i++) {
                     var result = results[i];
 
+                    console.log(result);
+
                     if (result.subscribed) {
                         var data = {
                             body: quote,
@@ -65,7 +67,7 @@ function sendSMS() {
     
                         client.messages.create(data, function(err, msg) {
                             if (err) {
-                                console.log("Could not send message");
+                                console.log("Could not send message: ", err);
                             } else {
                                 console.log("Sent message");
                             }
