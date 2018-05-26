@@ -13,6 +13,27 @@ const PhoneRecipient = new Schema({
     name: {
         type: String,
         required: true
+    },
+    lastSent: {
+        type: Number,
+        required: true,
+        default: 0
+    },
+    interval: {
+        type: Number,
+        required: true
+    }
+});
+
+const ReceivedMessage = new Schema({
+    recipient: {
+        type: mongoose.Schema.ObjectId,
+        ref: 'phonerecipients',
+        required: true
+    }, 
+    message: {
+        type: String,
+        required: true
     }
 });
 

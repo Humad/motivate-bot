@@ -32,4 +32,7 @@ app.use('/twilio', twilioRoutes);
 // Home
 app.get("/", function (req, res) {
 	res.send("Hello world!");
+	if (process.env.LOCAL) {
+		console.log("This is local");
+	}
 });

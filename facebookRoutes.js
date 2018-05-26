@@ -70,11 +70,11 @@ function addUserToDB(sender) {
             res.end(err);
         } else {
 			var db = client.db("motivate-bot");
-            db.collection("recipients").findOne({"sender" : sender}, function(err, result){
+            db.collection("facebookrecipients").findOne({"sender" : sender}, function(err, result){
 				if (result === null) {
 					// User not find; adding now
 					var data = {"sender": sender};
-					db.collection("recipients").insertOne(data, function(err, res) {
+					db.collection("facebookrecipients").insertOne(data, function(err, res) {
 						if (err) {
 							console.log(err);
 						}
@@ -101,7 +101,7 @@ function removeUserFromDB(sender) {
             res.end(err);
         } else {
 			var db = client.db("motivate-bot");
-            db.collection("recipients").remove({"sender" : sender}, function(err){
+            db.collection("facebookrecipients").remove({"sender" : sender}, function(err){
 				if (err) {
 					console.log(err);
 				} else {
@@ -122,7 +122,7 @@ function sendDailyMessage() {
 				res.end(err);
 			} else {
 				var db = client.db("motivate-bot");
-				db.collection("recipients").find().toArray(function(err, docs){
+				db.collection("facebookrecipients").find().toArray(function(err, docs){
 					for (var i = 0; i < docs.length; i++) {
 						sendTextMessage(docs[i].sender, quote)
 					}
