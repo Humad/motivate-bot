@@ -14,8 +14,8 @@ mongoose.connection.on("connected", function() {
 mongoose.connect(process.env.LOCAL ? process.env.TEST_MLAB_URI : process.env.MLAB_URI);
 
 // Twilio constants
-const accountSid = process.env.TWILIO_SID; 
-const authToken = process.env.TWILIO_AUTH_TOKEN; 
+const accountSid = process.env.TWILIO_SID;
+const authToken = process.env.TWILIO_AUTH_TOKEN;
 const fromNumber = process.env.MY_TWILIO_NUMBER;
 const twilio = require('twilio');
 const twilioClient = new twilio(accountSid, authToken);
@@ -149,7 +149,7 @@ function sendMessage(message, to) {
         if (err) {
             console.log("Could not send message:", err);
         } else {
-            console.log("Sent message to user:", result.name);
+            console.log("Sent message to:", to);
         }
     });
 }
