@@ -40,7 +40,7 @@ router.get('/', function(req, res) {
         }  else if (results.length === 0) {
             res.json("No subscribed users");
         } else {
-            res.json("Number of subscribed users:" + results.length);
+            res.send("Number of subscribed users: " + results.length);
         }
     });
 });
@@ -78,7 +78,7 @@ function handleReceivedMessage(message, from) {
 
             switch (message) {
                 case "hi" || "hello":
-                    sendMessage("Hi, I'm motivate bot! 😄", result.phoneNumber);
+                    sendIntroMessage(result.phoneNumber);
                     break;
                 case "unsubscribe" || "stop":
                     result.subscribed = false;
@@ -92,6 +92,9 @@ function handleReceivedMessage(message, from) {
                 case '' + parseInt(message):
                     result.interval = parseInt(message) * 1000 * 60 * 60;
                     sendMessage("Got it! I'll send you a motivational message every " + parseInt(message) + " hour(s) 🙂", result.phoneNumber);
+                    break;
+                case 'help':
+                    sendCommandHelp(result.phoneNumber);
                     break;
                 default: 
                     sendMessage("I'm sorry, I don't understand your message 😕 \n For a list of commands, say 'help'", result.phoneNumber);
@@ -134,6 +137,10 @@ function sendDailyMessage() {
 
                 if (currentTime - result.lastSent > result.interval) {
 
+                    if (result.lastSent === 0) {
+                        sendIntroMessage(result.phoneNumber);
+                    }
+
                     getQuote(function(quote) {
                         sendMessage(quote, result.phoneNumber);
                     });
@@ -150,6 +157,17 @@ function sendDailyMessage() {
             }
         }
     });
+}
+
+function sendIntroMessage(to) {
+    var introMessage = "Hi! I'm the motivational bot! Your number has been added to my database. \n This means that I get to send you a motivational message or quote from time to time! Currently, I am set to send you a message every " + (result.interval / 1000 / 60 / 60) + " hour(s)."
+    sendMessage(introMessage, to);
+    sendCommandHelp(to);
+}
+
+function sendCommandHelp(to) {
+    var commandHelp = "- To change the frequency of messages, send me a number. \n- To unsubscribe, say UNSUBSCRIBE \n- To subscribe, say SUBSCRIBE";
+    sendMessage(commandHelp, to);
 }
 
 function sendMessage(message, to) {
