@@ -3,6 +3,7 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const models = require('./models');
 const PhoneRecipient = models.PhoneRecipient;
+const ReceivedMessage = models.ReceivedMessage;
 
 const getQuote = require('./getQuote');
 
@@ -17,12 +18,20 @@ const accountSid = process.env.TWILIO_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN; 
 const fromNumber = process.env.MY_TWILIO_NUMBER;
 const twilio = require('twilio');
-const client = new twilio(accountSid, authToken);
+const twilioClient = new twilio(accountSid, authToken);
 
-setInterval(sendSMS, 1000 * 60);
+setInterval(sendDailyMessage, 1000 * 60);
 
 router.get('/', function(req, res) {
-    sendSMS();
+    PhoneRecipient.findOne({name: "Humad"}, function(err, result) {
+        if (err) {
+            console.log("Error finding Humad", err);
+        } else if (!result) {
+            console.log("Humad doesn't exist in database");
+        } else {
+            sendMessage("GET received", result.phoneNumber);
+        }
+    });
     res.send("Hello world!");
 });
 
@@ -36,9 +45,6 @@ router.post('/add', function(req, res) {
 });
 
 router.post('/message/receive', function(req, res) {
-    console.log(req.body.Body);
-    console.log(req.body.From);
-
     handleReceivedMessage(req.body.Body, req.body.From);
 });
 
@@ -60,10 +66,21 @@ function handleReceivedMessage(message, from) {
 
             message = message.toLowerCase();
 
-            if (message === "unsubscribe" || message === "stop") {
-                result.subscribed = false;
-            } else if (message === "subscribe" || message === "start") {
-                result.subscribed = true;
+            switch (message) {
+                case "unsubscribe" || "stop":
+                    result.subscribed = false;
+                    sendMessage("Alright, I'll stop sending you messages 😔", result.phoneNumber);
+                    break;
+                case "subscribe" || "start":
+                    result.subscribed = true;
+                    sendMessage("Yay, I'll send you motivational messages 😊", result.phoneNumber);
+                    break;
+                case '' + parseInt(message):
+                    result.interval = parseInt(message);
+                    sendMessage("Got it! I'll send you a motivational message every " + parseInt(message) + " hour(s) 🙂", result.phoneNumber);
+                    break;
+                default: 
+                    sendMessage("I'm sorry, I don't understand your message 😕 \n For a list of commands, say 'help'", result.phoneNumber);
             }
 
             result.save(function(err) {
@@ -88,10 +105,12 @@ function addNewRecipient(name, phoneNumber, interval) {
     });
 }
 
-function sendSMS() {
+function sendDailyMessage() {
     PhoneRecipient.find({subscribed: true}, function(err, results) {
         if (err) {
             console.log("Error finding phone recipients:", err);
+        } else if (results.length == 0) {
+            console.log("No subscribed users");
         } else {
             // Current time in millis
             var currentTime = (new Date()).getTime();
@@ -102,19 +121,7 @@ function sendSMS() {
                 if (currentTime - result.lastSent > result.interval) {
 
                     getQuote(function(quote) {
-                        var data = {
-                            body: quote,
-                            to: result.phoneNumber,
-                            from: fromNumber
-                        }
-    
-                        client.messages.create(data, function(err, msg) {
-                            if (err) {
-                                console.log("Could not send message:", err);
-                            } else {
-                                console.log("Sent message to user:", result.name);
-                            }
-                        });
+                        sendMessage(quote, result.phoneNumber);
                     });
 
                     result.lastSent = currentTime;
@@ -131,5 +138,20 @@ function sendSMS() {
     });
 }
 
+function sendMessage(message, to) {
+    var data = {
+        body: message, 
+        to: to,
+        from: fromNumber
+    };
+
+    twilioClient.messages.create(data, function(err, msg) {
+        if (err) {
+            console.log("Could not send message:", err);
+        } else {
+            console.log("Sent message to user:", result.name);
+        }
+    });
+}
 
 module.exports = router;

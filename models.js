@@ -38,5 +38,6 @@ const ReceivedMessage = new Schema({
 });
 
 module.exports = {
-    PhoneRecipient: mongoose.model('PhoneRecipient', PhoneRecipient)
+    PhoneRecipient: mongoose.model('PhoneRecipient', PhoneRecipient),
+    ReceivedMessage: mongoose.model('ReceivedMessage', ReceivedMessage)
 }
