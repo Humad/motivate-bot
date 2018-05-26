@@ -32,7 +32,17 @@ router.get('/', function(req, res) {
             sendMessage("GET received", result.phoneNumber);
         }
     });
-    res.send("Hello world!");
+
+    PhoneRecipient.find({subscribed: true}, function(err, results) {
+        if (err) {
+            console.log('Error finding subscribed recipients');
+            res.json("Hello world!");
+        }  else if (results.length === 0) {
+            res.json("No subscribed users");
+        } else {
+            res.json("Number of subscribed users:", results.length);
+        }
+    });
 });
 
 router.get('/add', function(req, res) {
@@ -67,16 +77,20 @@ function handleReceivedMessage(message, from) {
             message = message.toLowerCase();
 
             switch (message) {
+                case "hi" || "hello":
+                    sendMessage("Hi, I'm motivate bot! 😄", result.phoneNumber);
+                    break;
                 case "unsubscribe" || "stop":
                     result.subscribed = false;
                     sendMessage("Alright, I'll stop sending you messages 😔", result.phoneNumber);
                     break;
                 case "subscribe" || "start":
                     result.subscribed = true;
+                    result.lastSent = 0;
                     sendMessage("Yay, I'll send you motivational messages 😊", result.phoneNumber);
                     break;
                 case '' + parseInt(message):
-                    result.interval = parseInt(message);
+                    result.interval = parseInt(message) * 1000 * 60 * 60;
                     sendMessage("Got it! I'll send you a motivational message every " + parseInt(message) + " hour(s) 🙂", result.phoneNumber);
                     break;
                 default: 
