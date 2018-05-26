@@ -40,7 +40,7 @@ router.get('/', function(req, res) {
         }  else if (results.length === 0) {
             res.json("No subscribed users");
         } else {
-            res.json("Number of subscribed users:", results.length);
+            res.json("Number of subscribed users:" + results.length);
         }
     });
 });
