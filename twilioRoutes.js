@@ -78,7 +78,7 @@ function handleReceivedMessage(message, from) {
 
             switch (message) {
                 case "hi" || "hello":
-                    sendIntroMessage(result.phoneNumber);
+                    sendIntroMessage(result.phoneNumber, result.interval);
                     break;
                 case "unsubscribe" || "stop":
                     result.subscribed = false;
@@ -95,7 +95,6 @@ function handleReceivedMessage(message, from) {
                     break;
                 case 'help':
                     sendCommandHelp(result.phoneNumber);
-                    break;
                 default: 
                     sendMessage("I'm sorry, I don't understand your message 😕 \n For a list of commands, say 'help'", result.phoneNumber);
             }
@@ -138,7 +137,7 @@ function sendDailyMessage() {
                 if (currentTime - result.lastSent > result.interval) {
 
                     if (result.lastSent === 0) {
-                        sendIntroMessage(result.phoneNumber);
+                        sendIntroMessage(result.phoneNumber, result.interval);
                     }
 
                     getQuote(function(quote) {
@@ -159,8 +158,8 @@ function sendDailyMessage() {
     });
 }
 
-function sendIntroMessage(to) {
-    var introMessage = "Hi! I'm the motivational bot! Your number has been added to my database. \n This means that I get to send you a motivational message or quote from time to time! Currently, I am set to send you a message every " + (result.interval / 1000 / 60 / 60) + " hour(s)."
+function sendIntroMessage(to, interval) {
+    var introMessage = "Hi! I'm the motivational bot! Your number has been added to my database. \n This means that I get to send you a motivational message or quote from time to time! Currently, I am set to send you a message every " + (interval / 1000 / 60 / 60) + " hour(s)."
     sendMessage(introMessage, to);
     sendCommandHelp(to);
 }
