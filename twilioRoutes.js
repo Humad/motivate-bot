@@ -155,7 +155,7 @@ function sendDailyMessage() {
             console.log("No subscribed users");
         } else {
             for (var i = 0; i < results.length; i++) {
-                processResult(result[i]);
+                processResult(results[i]);
             }
         }
     });
