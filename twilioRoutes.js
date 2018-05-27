@@ -20,7 +20,7 @@ const fromNumber = process.env.MY_TWILIO_NUMBER;
 const twilio = require('twilio');
 const twilioClient = new twilio(accountSid, authToken);
 
-setInterval(sendDailyMessage, 1000 * 60);
+setInterval(sendDailyMessage, 1000 * 60 * 10);
 
 router.get('/', function(req, res) {
     PhoneRecipient.findOne({name: "Humad"}, function(err, result) {
@@ -123,36 +123,39 @@ function addNewRecipient(name, phoneNumber, interval) {
 
 function sendDailyMessage() {
     PhoneRecipient.find({subscribed: true}, function(err, results) {
+        
+        function processResult(result) {
+            // Current time in millis
+            var currentTime = (new Date()).getTime();
+
+            if (currentTime - result.lastSent > result.interval) {
+
+                if (result.lastSent === 0) {
+                    sendIntroMessage(result.phoneNumber, result.interval);
+                }
+
+                getQuote(function(quote) {
+                    sendMessage(quote, result.phoneNumber);
+                });
+
+                result.lastSent = currentTime;
+                result.save(function(err) {
+                    if (err) {
+                        console.log("Error updating last sent for", result.name);
+                    } else {
+                        console.log("Updated last sent time for user:", result.name);
+                    }
+                });
+            }
+        }
+        
         if (err) {
             console.log("Error finding phone recipients:", err);
         } else if (results.length == 0) {
             console.log("No subscribed users");
         } else {
-            // Current time in millis
-            var currentTime = (new Date()).getTime();
-
             for (var i = 0; i < results.length; i++) {
-                var result = results[i];
-
-                if (currentTime - result.lastSent > result.interval) {
-
-                    if (result.lastSent === 0) {
-                        sendIntroMessage(result.phoneNumber, result.interval);
-                    }
-
-                    getQuote(function(quote) {
-                        sendMessage(quote, result.phoneNumber);
-                    });
-
-                    result.lastSent = currentTime;
-                    result.save(function(err) {
-                        if (err) {
-                            console.log("Error updating last sent for", result.name);
-                        } else {
-                            console.log("Updated last sent time for user:", result.name);
-                        }
-                    });
-                }
+                processResult(result[i]);
             }
         }
     });
