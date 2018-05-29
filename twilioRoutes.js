@@ -20,7 +20,9 @@ const fromNumber = process.env.MY_TWILIO_NUMBER;
 const twilio = require('twilio');
 const twilioClient = new twilio(accountSid, authToken);
 
-setInterval(sendDailyMessage, 1000 * 60 * 10);
+setInterval(sendDailyMessage, 1000 * 60);
+
+// GET
 
 router.get('/', function(req, res) {
     PhoneRecipient.findOne({name: "Humad"}, function(err, result) {
@@ -49,14 +51,42 @@ router.get('/add', function(req, res) {
     res.render('addNumber');
 });
 
+router.get('/allUsers', function(req, res) {
+    PhoneRecipient.find({}, function(err, results) {
+        if (err) {
+            console.log("Error finding phone recipients");
+            res.json({"Error": err});
+        } else {
+            res.json({"results": results});
+        }
+    });
+});
+
+router.get('/subscribers', function(req, res) {
+    PhoneRecipient.find({subscribed: true}, function(err, results) {
+        if (err) {
+            console.log("Error finding phone recipients");
+            res.json({"Error": err});
+        } else {
+            res.json({"results": results});
+        }
+    });
+});
+
+// POST
+
 router.post('/add', function(req, res) {
     addNewRecipient(req.body.name, req.body.phoneNumber, req.body.interval);
-    res.render('addNumber');
+    res.redirect('/add');
 });
 
 router.post('/message/receive', function(req, res) {
     handleReceivedMessage(req.body.Body, req.body.From);
 });
+
+//////////////////////
+// Helper Functions //
+//////////////////////
 
 function handleReceivedMessage(message, from) {
     PhoneRecipient.findOne({phoneNumber: from}, function(err, result) {
@@ -184,6 +214,21 @@ function sendMessage(message, to) {
             console.log("Could not send message:", err);
         } else {
             console.log("Sent message to:", to);
+        }
+    });
+
+    PhoneRecipient.findOne({phoneNumber: to}, function(err, result){
+        if (err) {
+            console.log("Error finding user with number:", to);
+        } else if (!result) {
+            console.log("No user found with number", to);
+        } else {
+            result.messageHistory.push(message);
+            result.save(function(err) {
+                if (err) {
+                    console.log("Error adding message to user", result.name);
+                }
+            });
         }
     });
 }

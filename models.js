@@ -19,6 +19,10 @@ const PhoneRecipient = new Schema({
         required: true,
         default: 0
     },
+    messageHistory: {
+        type: [String],
+        required: false
+    },
     interval: {
         type: Number,
         required: true
