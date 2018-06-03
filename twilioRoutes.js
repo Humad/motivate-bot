@@ -162,20 +162,20 @@ function sendDailyMessage() {
 
                 if (result.lastSent === 0) {
                     sendIntroMessage(result.phoneNumber, result.interval);
-                } else {
-                    getQuote(function(quote) {
-                        sendMessage(quote, result.phoneNumber);
-                    });
-    
-                    result.lastSent = currentTime;
-                    result.save(function(err) {
-                        if (err) {
-                            console.log("Error updating last sent for", result.name);
-                        } else {
-                            console.log("Updated last sent time for user:", result.name);
-                        }
-                    });
-                }                
+                }
+
+                getQuote(function(quote) {
+                    sendMessage(quote, result.phoneNumber);
+                });
+
+                result.lastSent = currentTime;
+                result.save(function(err) {
+                    if (err) {
+                        console.log("Error updating last sent for", result.name);
+                    } else {
+                        console.log("Updated last sent time for user:", result.name);
+                    }
+                });
             }
         }
         
