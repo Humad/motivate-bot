@@ -77,7 +77,7 @@ router.get('/subscribers', function(req, res) {
 
 router.post('/add', function(req, res) {
     addNewRecipient(req.body.name, req.body.phoneNumber, req.body.interval);
-    res.redirect('/add');
+    res.redirect('/twilio/add');
 });
 
 router.post('/message/receive', function(req, res) {
@@ -162,20 +162,20 @@ function sendDailyMessage() {
 
                 if (result.lastSent === 0) {
                     sendIntroMessage(result.phoneNumber, result.interval);
-                }
-
-                getQuote(function(quote) {
-                    sendMessage(quote, result.phoneNumber);
-                });
-
-                result.lastSent = currentTime;
-                result.save(function(err) {
-                    if (err) {
-                        console.log("Error updating last sent for", result.name);
-                    } else {
-                        console.log("Updated last sent time for user:", result.name);
-                    }
-                });
+                } else {
+                    getQuote(function(quote) {
+                        sendMessage(quote, result.phoneNumber);
+                    });
+    
+                    result.lastSent = currentTime;
+                    result.save(function(err) {
+                        if (err) {
+                            console.log("Error updating last sent for", result.name);
+                        } else {
+                            console.log("Updated last sent time for user:", result.name);
+                        }
+                    });
+                }                
             }
         }
         
