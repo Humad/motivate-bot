@@ -17,6 +17,8 @@ function getQuote(callback) {
 		// TODO: Find a better way to check for author existence
 		if (parsedBody.data.author !== "%20") {
 			quote = quote + "\" - " + decodeURIComponent(parsedBody.data.author);
+		} else {
+			quote = quote + "\"";
 		}
 		callback(quote);
     });
