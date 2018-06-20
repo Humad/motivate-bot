@@ -15,7 +15,10 @@ const twilioClient = new twilio(accountSid, authToken);
 
 setInterval(sendDailyMessage, 1000 * 60);
 
-// GET
+/////////
+// GET //
+/////////
+
 router.get('/', function(req, res) {
     PhoneRecipient.findOne({name: "Humad"}, function(err, result) {
         if (err) {
@@ -64,7 +67,9 @@ router.get('/message/send', function(req, res) {
     res.render('sendMessage');
 });
 
-// POST
+//////////
+// POST //
+//////////
 
 router.post('/add', function(req, res) {
     addNewRecipient(req.body.name, req.body.phoneNumber, req.body.interval);
