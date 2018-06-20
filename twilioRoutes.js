@@ -63,14 +63,13 @@ router.get('/allUsers', function(req, res) {
 });
 
 router.get('/subscribers', function(req, res) {
-    PhoneRecipient.find({subscribed: true}, function(err, results) {
-        if (err) {
-            console.log("Error finding phone recipients");
-            res.json({"Error": err});
-        } else {
-            res.json({"results": results});
-        }
-    });
+    getSubscribers(function(jsonData) {
+        res.json(jsonData);
+    })
+});
+
+router.get('/message/send', function(req, res) {
+    res.render('sendMessage');
 });
 
 // POST
@@ -84,9 +83,31 @@ router.post('/message/receive', function(req, res) {
     handleReceivedMessage(req.body.Body, req.body.From);
 });
 
+router.post('/message/send', function(req, res) {
+    console.log("POST RECEIVED FOR SENDING MESSAGE TO SUBSCRIBERS", req.body.message);
+    getSubscribers(function(jsonData) {
+        console.log(jsonData.results);
+        jsonData.results.forEach(function(subscriber) {
+            sendMessage(req.body.message, subscriber.phoneNumber);
+        });
+    });
+    res.render('sendMessage');
+});
+
 //////////////////////
 // Helper Functions //
 //////////////////////
+
+function getSubscribers(callback) {
+    PhoneRecipient.find({subscribed: true}, function(err, results) {
+        if (err) {
+            console.log("Error finding phone recipients");
+            callback({"error": err});
+        } else {
+            callback({"results": results});
+        }
+    });
+}
 
 function handleReceivedMessage(message, from) {
     PhoneRecipient.findOne({phoneNumber: from}, function(err, result) {
