@@ -1,17 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const mongoose = require('mongoose');
 const models = require('./models');
 const PhoneRecipient = models.PhoneRecipient;
 const ReceivedMessage = models.ReceivedMessage;
 
 const getQuote = require('./getQuote');
-
-mongoose.connection.on("connected", function() {
-    console.log("Connected to mlab");
-});
-
-mongoose.connect(process.env.LOCAL ? process.env.TEST_MLAB_URI : process.env.MLAB_URI);
 
 // Twilio constants
 const accountSid = process.env.TWILIO_SID;
@@ -23,7 +16,6 @@ const twilioClient = new twilio(accountSid, authToken);
 setInterval(sendDailyMessage, 1000 * 60);
 
 // GET
-
 router.get('/', function(req, res) {
     PhoneRecipient.findOne({name: "Humad"}, function(err, result) {
         if (err) {
@@ -84,9 +76,7 @@ router.post('/message/receive', function(req, res) {
 });
 
 router.post('/message/send', function(req, res) {
-    console.log("POST RECEIVED FOR SENDING MESSAGE TO SUBSCRIBERS", req.body.message);
     getSubscribers(function(jsonData) {
-        console.log(jsonData.results);
         jsonData.results.forEach(function(subscriber) {
             sendMessage(req.body.message, subscriber.phoneNumber);
         });

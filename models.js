@@ -41,7 +41,19 @@ const ReceivedMessage = new Schema({
     }
 });
 
+const User = new Schema({
+    username: {
+        type: String, 
+        required: true
+    },
+    password: {
+        type: String, 
+        required: true
+    }
+});
+
 module.exports = {
     PhoneRecipient: mongoose.model('PhoneRecipient', PhoneRecipient),
-    ReceivedMessage: mongoose.model('ReceivedMessage', ReceivedMessage)
+    ReceivedMessage: mongoose.model('ReceivedMessage', ReceivedMessage),
+    User: mongoose.model('User', User)
 }
