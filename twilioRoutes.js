@@ -131,14 +131,17 @@ function handleReceivedMessage(message, from) {
             message = message.toLowerCase();
 
             switch (message) {
-                case "hi" || "hello":
+                case "hi":
+                case "hello":
                     sendIntroMessage(result.phoneNumber, result.interval);
                     break;
-                case "unsubscribe" || "stop":
+                case "unsubscribe":
+                case "stop":
                     result.subscribed = false;
                     sendMessage("Alright, I'll stop sending you messages 😔", result.phoneNumber);
                     break;
-                case "subscribe" || "start":
+                case "subscribe":
+                case "start":
                     result.subscribed = true;
                     result.lastSent = 0;
                     sendMessage("Yay, I'll send you motivational messages 😊", result.phoneNumber);
@@ -147,7 +150,8 @@ function handleReceivedMessage(message, from) {
                     result.interval = parseInt(message) * 1000 * 60 * 60;
                     sendMessage("Got it! I'll send you a motivational message every " + parseInt(message) + " hour(s) 🙂", result.phoneNumber);
                     break;
-                case 'help' || 'commands':
+                case "help":
+                case "commands":
                     sendCommandHelp(result.phoneNumber);
                 default: 
                     sendMessage("I'm sorry, I don't understand your message 😕 \n For a list of commands, say 'help'", result.phoneNumber);
