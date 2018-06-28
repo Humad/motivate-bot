@@ -83,10 +83,8 @@ router.post('/add', function(req, res) {
 });
 
 router.post('/message/receive', function(req, res) {
-    console.log("Received message");
     handleReceivedMessage(req.body.Body, req.body.From);
-    console.log(req.body.Body);
-    console.log(req.body.From);
+    res.status(200).send("Received");
 });
 
 router.post('/message/send', function(req, res) {
@@ -149,7 +147,7 @@ function handleReceivedMessage(message, from) {
                     result.interval = parseInt(message) * 1000 * 60 * 60;
                     sendMessage("Got it! I'll send you a motivational message every " + parseInt(message) + " hour(s) 🙂", result.phoneNumber);
                     break;
-                case 'help':
+                case 'help' || 'commands':
                     sendCommandHelp(result.phoneNumber);
                 default: 
                     sendMessage("I'm sorry, I don't understand your message 😕 \n For a list of commands, say 'help'", result.phoneNumber);
