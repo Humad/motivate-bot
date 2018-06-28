@@ -10,6 +10,7 @@ const models = require('./models');
 const User = models.User;
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
+const authChecker = require('./authChecker');
 
 // App setup
 app.set("port", (process.env.PORT || 8000));
@@ -96,17 +97,8 @@ app.use(passport.session());
 
 // ---- //
 
-function authChecker(req, res, next) {
-	if (!req.user) {
-		res.redirect('/login');
-	} else {
-		next();
-	}
-}
-
 // Assign authChecker
 app.use('/webhook', authChecker);
-app.use('/twilio', authChecker);
 app.use('/signup', authChecker);
 
 const facebookRoutes = require('./facebookRoutes');
@@ -116,7 +108,7 @@ app.use('/webhook', facebookRoutes);
 
 // Home
 app.get("/", function (req, res) {
-	res.send("Hello world!");
+	res.render("homepage");
 });
 
 app.get('/login', function(req, res) {

@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
+const passport = require('passport');
 const models = require('./models');
+const authChecker = require('./authChecker');
 const PhoneRecipient = models.PhoneRecipient;
 const ReceivedMessage = models.ReceivedMessage;
 
@@ -14,6 +16,10 @@ const twilio = require('twilio');
 const twilioClient = new twilio(accountSid, authToken);
 
 setInterval(sendDailyMessage, 1000 * 60);
+
+router.use('/subscribers', authChecker);
+router.use('/add', authChecker);
+
 
 /////////
 // GET //
@@ -77,7 +83,10 @@ router.post('/add', function(req, res) {
 });
 
 router.post('/message/receive', function(req, res) {
+    console.log("Received message");
     handleReceivedMessage(req.body.Body, req.body.From);
+    console.log(req.body.Body);
+    console.log(req.body.From);
 });
 
 router.post('/message/send', function(req, res) {
@@ -111,6 +120,7 @@ function handleReceivedMessage(message, from) {
         } else if (!result) {
             console.log("No stored recipient with number", from);
         } else {
+            console.log("Found recipient");
             var newMessage = new ReceivedMessage();
             newMessage.recipient = result._id;
             newMessage.message = message;
