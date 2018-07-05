@@ -6,6 +6,8 @@ This application works with the Twilio API to send a text message to its subscri
 
 This was initially meant to be a Facebook messenger bot but Facebook has not yet approved my application request. I decided to switch over to Twilio because it was faster. 
 
+I am currently using JavaScript, Node.js and Express to handle the server. My list of subscribed users is stored using MongoDB. 
+
 [Live Web Version](https://motivate-bot.herokuapp.com/)
 
 [My Medium article: Creating a motivational Facebook Messenger Bot using Node.js](https://medium.com/@humadvii/creating-a-motivational-facebook-messenger-bot-using-node-js-c50954e93347)
