@@ -18,7 +18,6 @@ const twilioClient = new twilio(accountSid, authToken);
 setInterval(sendDailyMessage, 1000 * 60);
 
 router.use('/subscribers', authChecker);
-router.use('/add', authChecker);
 
 
 /////////

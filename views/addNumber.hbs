@@ -1,11 +1,33 @@
-<form method="POST" action="/twilio/add">
-    <input type="text" name="name"> Name
-    <br>
-    <input type="number" name="phoneNumber"> Phone number
-    <br>
-    <input type="number" name="interval" step="0.01"> Frequency (in hours)
-    <br>
-    <button>Submit</button>
-</form>
 
-<h1></h1>
+<div style="text-align: center">
+    <h3>Sign up to receive motivational text messages!</h3> 
+</div>
+
+
+<div style="display: flex; justify-content: center; align-items: center;">
+
+    
+
+    <form id="numberSubmitForm" method="POST" action="/twilio/add">
+    <div class="form-group">
+        <label for="exampleInputEmail1">Name</label>
+        <input type="text" name="name" placeholder="Name" class="form-control">
+    </div>
+    <div class="form-group">
+        <label for="exampleInputPassword1">Phone Number</label>
+        <input type="number" name="phoneNumber" placeholder="Format: 5556781234" class="form-control">
+    </div>
+    <div class="form-group">
+        <input type="number" name="interval" step="0.01" placeholder="Frequency (in hours)" class="form-check-input">
+        <label class="form-check-label" for="exampleCheck1">Frequency in hours</label>
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+
+</div>
+
+<script>
+    $("#numberSubmitForm").on("submit", function(event) {
+        alert("Successfully submitted! You will receive your motivational messages :)")
+    });
+</script>

@@ -11,12 +11,15 @@ const User = models.User;
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const authChecker = require('./authChecker');
+const hbs = require('express-handlebars');
 
 // App setup
 app.set("port", (process.env.PORT || 8000));
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
+
 app.set('views', path.join(__dirname, 'views'));
+app.engine("hbs", hbs({extname: "hbs", defaultLayout: "layout", layoutsDir: __dirname + '/views/layouts'}));
 app.set('view engine', 'hbs');
 
 // Start server
@@ -113,6 +116,10 @@ app.get("/", function (req, res) {
 
 app.get('/login', function(req, res) {
 	res.render('login');
+});
+
+app.get('/facebook', function(req, res) {
+	res.render('facebookHome');
 });
 
 app.get('/logout', function(req, res) {
