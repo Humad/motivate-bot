@@ -6,7 +6,11 @@ This application works with the Twilio API to send a text message to its subscri
 
 This was initially meant to be a Facebook messenger bot but Facebook has not yet approved my application request. I decided to switch over to Twilio because it was faster. 
 
-I am currently using JavaScript, Node.js and Express to handle the server. My list of subscribed users is stored using MongoDB. 
+# How it works
+
+Motivate bot relies on a server created using Node.js and Express. It communicates with a Mongo database to retrieve and update its users. It periodically checks if it is time to send a message to a certain subscribed users. It also handles messages from the users, updating their data accordingly.
+
+I am using my custom [Quotes API](https://github.com/Humad/Quotes-API) to get random quotes to send to the subscribers.
 
 [Live Web Version](https://motivate-bot.herokuapp.com/)
 
